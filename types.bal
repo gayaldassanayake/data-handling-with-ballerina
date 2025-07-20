@@ -40,7 +40,12 @@ type Summary record {|
     |} statusBreakdown;
 |};
 
-type PriceChart record {|
-    decimal base;
-    decimal perKg;
-|};
+type Tracking record {
+    string code;
+    string lastUpdate;
+    string location;
+};
+
+type Trackings record {
+    Tracking[] Tracking;
+};

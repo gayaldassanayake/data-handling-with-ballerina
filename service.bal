@@ -2,6 +2,8 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/uuid;
 import ballerinax/googleapis.gmail;
+import ballerina/data.jsondata;
+import ballerina/data.xmldata;
 
 table<Delivery> key(trackingCode) deliveryTable = table [];
 
@@ -17,7 +19,7 @@ service /delivery\-tracking on new http:Listener(9090) {
 
     resource function post deliveries(DeliveryInsert deliveryInsert) returns Delivery|error {
         string trackingCode = uuid:createRandomUuid();
-        decimal cost = check calculateCost(deliveryInsert.weightKg);
+        decimal cost = basePrice + perKg * deliveryInsert.weightKg;
         Delivery delivery = {
             trackingCode,
             cost,
@@ -66,12 +68,15 @@ service /delivery\-tracking on new http:Listener(9090) {
             statusBreakdown: {pending: pendingCount, inTransit: inTransitCount, delivered: deliveredCount}
         };
     }
-}
 
-function calculateCost(decimal weightKg) returns decimal|error {
-    json priceData = check io:fileReadJson("./resources/charges.json");
-    PriceChart PriceChart = check priceData.fromJsonWithType();
-    return PriceChart.base + weightKg * PriceChart.perKg;
+    resource function get monitor() returns Tracking[]|error {
+        json carrierAJson = check io:fileReadJson("./resources/carrier-a.json");
+        Tracking[] trackings = check jsondata:parseAsType(carrierAJson);
+        xml carrierBXml = check io:fileReadXml("./resources/carrier-b.xml");
+        Trackings xmlTrackings = check xmldata:parseAsType(carrierBXml);
+        trackings.push(...xmlTrackings.Tracking);
+        return trackings;
+    }
 }
 
 function notifyCustomer(Delivery delivery) returns error? {

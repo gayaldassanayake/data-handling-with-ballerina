@@ -20,6 +20,7 @@ The delivery tracking API consists of the following resources:
 | GET deliveries[?status][?customerId]  | Get deliveries that match the filters  |
 |  PATCH deliveries/{trackingCode} |  Update the delivery status |
 | GET summary |  Get the summary of the deliveries |
+| GET monitor |  Get the current status of the deliveries from external sources |
 
 ## Prerequisites
 
@@ -69,7 +70,7 @@ The delivery tracking API consists of the following resources:
     ```ballerina
         cost = baseCost + (weightKg * costPerKg)
     ```
-    The baseCost and the costPerKg are defined in `./resources/charges.json` file. Use `ballerina/io` module to read the JSON file and extract the values.
+    Define `baseCost` and `costPerKg` as configurables in a separate `config.bal` file.
 
 8. Implement the `POST deliveries` resource to create a new delivery. The resource should:
    - Generate a random UUID as the tracking code.
@@ -110,3 +111,51 @@ The delivery tracking API consists of the following resources:
         }
     }
     ```
+
+12. Implement the `GET monitor` resource to get the current status of the deliveries from external sources. Assume there are 2 external carrier services that provide tracking information in different formats. 
+
+    - `Carrier A` provides the tracking information in a JSON file format. Please save the below JSON in `resources/carrier-a.json`.
+
+    ```json
+    [
+        {
+            "code": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "lastUpdate": "2025-07-19T07:30:00Z",
+            "location": "7.8731,80.7718"
+        },
+        {
+            "code": "6b1f23f1-e204-4641-a660-0b71e382f9ac",
+            "lastUpdate": "2025-07-19T10:15:00Z",
+            "location": "6.9271,79.8612"
+        },
+        {
+            "code": "b6212e32-5742-4b18-bf58-8e52f3e47651",
+            "lastUpdate": "2025-07-18T18:00:00Z",
+            "location": "7.1603,80.5938"
+        }
+    ]
+    ```
+
+    - `Carrier B` provides the tracking information in an XML file format. Please save the below XML in `resources/carrier-b.xml`.
+
+    ```xml
+    <Trackings>
+        <Tracking>
+            <code>fa496458-03e4-4418-8533-73e38f144dd0</code>
+            <lastUpdate>2025-07-19T08:45:00Z</lastUpdate>
+            <location>6.9271,79.8612</location>
+        </Tracking>
+        <Tracking>
+            <code>88f88432-b2f5-4766-8744-5ab07b32f65e</code>
+            <lastUpdate>2025-07-19T09:10:00Z</lastUpdate>
+            <location>7.2906,80.6337</location>
+        </Tracking>
+        <Tracking>
+            <code>11ab9c35-1a6f-4aa1-bd52-0a6aaff2e7dc</code>
+            <lastUpdate>2025-07-18T17:30:00Z</lastUpdate>
+            <location>6.0535,80.2210</location>
+        </Tracking>
+    </Trackings>
+    ```
+
+    Parse the JSON and XML data into Ballerina records and merge them with the existing deliveries in the table. Return the merged data as a response. You may use `ballerina/data.jsondata` and `ballerina/data.xmldata` modules to parse the data.
