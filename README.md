@@ -70,7 +70,7 @@ The delivery tracking API consists of the following resources:
     ```ballerina
         cost = baseCost + (weightKg * costPerKg)
     ```
-    Define `baseCost` and `costPerKg` as configurables in a separate `config.bal` file.
+    Define `baseCost` and `costPerKg` as configurables.
 
 8. Implement the `POST deliveries` resource to create a new delivery. The resource should:
    - Generate a random UUID as the tracking code.
@@ -105,9 +105,9 @@ The delivery tracking API consists of the following resources:
         "totalDeliveries": 10,
         "averageCost": 500.00,
         "statusBreakdown": {
-            "Pending": 5,
-            "In Transit": 3,
-            "Delivered": 2
+            "pending": 5,
+            "inTransit": 3,
+            "delivered": 2
         }
     }
     ```

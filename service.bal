@@ -53,15 +53,15 @@ service /delivery\-tracking on new http:Listener(9090) {
         int totalDeliveries = deliveryTable.length();
         decimal averageCost = from var {cost} in deliveryTable
             collect avg(cost) ?: 0d;
-        int pendingCount = from var {status} in deliveryTable
+        int pendingCount = from var {trackingCode, status} in deliveryTable
             where status == PENDING
-            collect count(status);
-        int inTransitCount = from var {status} in deliveryTable
+            collect count(trackingCode);
+        int inTransitCount = from var {trackingCode, status} in deliveryTable
             where status == IN_TRANSIT
-            collect count(status);
-        int deliveredCount = from var {status} in deliveryTable
+            collect count(trackingCode);
+        int deliveredCount = from var {trackingCode, status} in deliveryTable
             where status == DELIVERED
-            collect count(status);
+            collect count(trackingCode);
         return {
             totalDeliveries,
             averageCost,
